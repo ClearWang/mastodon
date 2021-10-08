@@ -9,13 +9,22 @@ class Api::V1::NotificationsController < Api::BaseController
   DEFAULT_NOTIFICATIONS_LIMIT = 15
 
   def index
-    @notifications = load_notifications
-    render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
+    # 展示之前先调用外部接口鉴权
+    if require_check
+      @notifications = load_notifications
+      render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
+    else
+      render plain: "index接口鉴权失败"
+    end
   end
 
   def show
-    @notification = current_account.notifications.without_suspended.find(params[:id])
-    render json: @notification, serializer: REST::NotificationSerializer
+    if
+      @notification = current_account.notifications.without_suspended.find(params[:id])
+      render json: @notification, serializer: REST::NotificationSerializer
+    else
+      render plain: "show接口鉴权失败"
+    end
   end
 
   def clear
@@ -84,5 +93,27 @@ class Api::V1::NotificationsController < Api::BaseController
 
   def pagination_params(core_params)
     params.slice(:limit, :exclude_types).permit(:limit, exclude_types: []).merge(core_params)
+  end
+
+  def require_check
+    parm = {
+      "UserName" => "will2"
+    }.to_json
+    resp = send_request("http://8.135.2.89:10001/test",parm)
+    logger.debug "resp ===================== #{resp}"
+    if resp['ret'] == 0
+      return true
+    else
+      return false
+    end
+  end
+
+  def send_request(url,parm)
+    uri = URI(url)
+    http = Net::HTTP.new(uri.host,uri.port)
+    req = Net::HTTP::Post.new(uri.path,initheader = {'Content-Type' => 'application/json'})
+    req.body = parm
+    res = http.request(req)
+    return JSON.parse(res.body)
   end
 end
