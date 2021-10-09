@@ -63,8 +63,13 @@ class Api::V1::NotificationsController < Api::BaseController
   end
 
   def next_path
-    unless @notifications.empty?
-      api_v1_notifications_url pagination_params(max_id: pagination_max_id)
+    # 展示之前先调用外部接口鉴权
+    if require_check
+      unless @notifications.empty?
+        api_v1_notifications_url pagination_params(max_id: pagination_max_id)
+      end
+    else
+      render plain: "show接口鉴权失败"
     end
   end
 
