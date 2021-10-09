@@ -73,7 +73,7 @@ class Api::V1::NotificationsController < Api::BaseController
         api_v1_notifications_url pagination_params(max_id: pagination_max_id)
       end
     else
-      render plain: "next_path接口鉴权失败"
+      logger.error "next_path require_check 鉴权失败"
     end
   end
 
@@ -114,6 +114,7 @@ class Api::V1::NotificationsController < Api::BaseController
     if resp['ret'] == 0
       return true
     else
+      logger.error "鉴权失败 resp ===================== #{resp}"
       return false
     end
   end
