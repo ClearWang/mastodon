@@ -213,7 +213,7 @@ class AccountCard extends ImmutablePureComponent {
           <Permalink
             className='directory__card__bar__name'
             href={account.get('url')}
-            to={`/@${account.get('acct')}`}
+            to={`/accounts/${account.get('id')}`}
           >
             <Avatar account={account} size={48} />
             <DisplayName account={account} />

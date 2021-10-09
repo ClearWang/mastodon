@@ -2,7 +2,7 @@
 
 class FastGeometryParser
   def self.from_file(file)
-    width, height = FastImage.size(file)
+    width, height = FastImage.size(file.path)
 
     raise Paperclip::Errors::NotIdentifiedByImageMagickError if width.nil?
 

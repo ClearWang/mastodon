@@ -8,10 +8,8 @@ RSpec.describe HomeController, type: :controller do
 
     context 'when not signed in' do
       context 'when requested path is tag timeline' do
-        it 'redirects to the tag\'s permalink' do
-          @request.path = '/web/timelines/tag/name'
-          is_expected.to redirect_to '/tags/name'
-        end
+        before { @request.path = '/web/timelines/tag/name' }
+        it { is_expected.to redirect_to '/tags/name' }
       end
 
       it 'redirects to about page' do

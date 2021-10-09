@@ -42,7 +42,7 @@ class Auth::SessionsController < Devise::SessionsController
   end
 
   def webauthn_options
-    user = User.find_by(id: session[:attempt_user_id])
+    user = find_user
 
     if user&.webauthn_enabled?
       options_for_get = WebAuthn::Credential.options_for_get(

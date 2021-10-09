@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   mastodon-db:
@@ -23,19 +23,15 @@ services:
     restart: unless-stopped
 
   mastodon-web:
-    # image: tootsuite/mastodon
-    image: clearwill520/mastodon:latest
+    #image: clearwill520/mastodon:latest
+    image: tootsuite/mastodon
     env_file: .env.production
     command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"
     depends_on:
       - mastodon-db
       - mastodon-redis
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -q --spider --proxy=off localhost:3000/health || exit 1",
-        ]
+      test: ["CMD-SHELL", "wget -q --spider --proxy=off localhost:3000/health || exit 1"]
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
@@ -43,24 +39,22 @@ services:
     restart: unless-stopped
 
   mastodon-streaming:
-    image: clearwill520/mastodon:latest
+    #image: clearwill520/mastodon:latest
+    image: tootsuite/mastodon
     env_file: .env.production
     command: node ./streaming
     depends_on:
       - mastodon-db
       - mastodon-redis
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1",
-        ]
+      test: ["CMD-SHELL", "wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1"]
     ports:
       - "127.0.0.1:4000:4000"
     restart: unless-stopped
 
   mastodon-sidekiq:
-    image: clearwill520/mastodon:latest
+    #image: clearwill520/mastodon:latest
+    image: tootsuite/mastodon
     env_file: .env.production
     command: bundle exec sidekiq
     depends_on:
@@ -77,14 +71,10 @@ services:
       - "cluster.name=es-mastodon"
       - "discovery.type=single-node"
       - "bootstrap.memory_lock=true"
-    #    networks:
-    #      - internal_network
+#    networks:
+#      - internal_network
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl --silent --fail localhost:9200/_cluster/health || exit 1",
-        ]
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
     volumes:
       - ./elasticsearch:/usr/share/elasticsearch/data
     ulimits:
