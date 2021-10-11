@@ -10,15 +10,16 @@ class Api::V1::NotificationsController < Api::BaseController
 
   def index
     logger.info "NotificationsController::index接口调用开始"
-    @notifications = load_notifications
-    render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
+    # @notifications = load_notifications
+    # render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
     # 展示之前先调用外部接口鉴权
-    # if require_check
-    #   @notifications = load_notifications
-    #   render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
-    # else
-    #   render plain: "index接口鉴权失败"
-    # end
+    if require_check
+      logger.info "NotificationsController::index require_check 鉴权成功"
+      @notifications = load_notifications
+      render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
+    else
+      render plain: "NotificationsController::index require_check index接口鉴权失败"
+    end
   end
 
   def show
@@ -76,14 +77,8 @@ class Api::V1::NotificationsController < Api::BaseController
 
   def next_path
     logger.info "NotificationsController::next_path"
-    # 展示之前先调用外部接口鉴权
-    if require_check
-      logger.info "next_path require_check 鉴权成功"
-      unless @notifications.empty?
-        api_v1_notifications_url pagination_params(max_id: pagination_max_id)
-      end
-    else
-      logger.error "next_path require_check 鉴权失败"
+    unless @notifications.empty?
+      api_v1_notifications_url pagination_params(max_id: pagination_max_id)
     end
   end
 
