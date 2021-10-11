@@ -69,6 +69,7 @@ class Api::V1::NotificationsController < Api::BaseController
   def next_path
     # 展示之前先调用外部接口鉴权
     if require_check
+      logger.info "next_path require_check 鉴权成功 resp ===================== #{resp}"
       unless @notifications.empty?
         api_v1_notifications_url pagination_params(max_id: pagination_max_id)
       end
@@ -110,11 +111,10 @@ class Api::V1::NotificationsController < Api::BaseController
       "UserName" => "will2"
     }.to_json
     resp = send_request("http://8.135.2.89:10001/test",parm)
-    logger.debug "resp ===================== #{resp}"
+    logger.info "require_check::send_request resp ===================== #{resp}"
     if resp['ret'] == 0
       return true
     else
-      logger.error "鉴权失败 resp ===================== #{resp}"
       return false
     end
   end

@@ -5,4 +5,4 @@ require_relative 'application'
 Rails.application.initialize!
 
 ActiveRecord::SchemaDumper.ignore_tables = ['deprecated_preview_cards']
-Rails.logger.level = Logger::WARN
+# Rails.logger.level = Logger::WARN
