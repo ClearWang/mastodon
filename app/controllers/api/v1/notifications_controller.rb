@@ -18,6 +18,7 @@ class Api::V1::NotificationsController < Api::BaseController
       @notifications = load_notifications
       render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
     else
+      @notifications = ""
       render plain: "NotificationsController::index require_check index接口鉴权失败"
     end
   end
