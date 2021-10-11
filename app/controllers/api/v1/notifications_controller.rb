@@ -9,6 +9,7 @@ class Api::V1::NotificationsController < Api::BaseController
   DEFAULT_NOTIFICATIONS_LIMIT = 15
 
   def index
+    logger.info "NotificationsController::index接口调用开始"
     @notifications = load_notifications
     render json: @notifications, each_serializer: REST::NotificationSerializer, relationships: StatusRelationshipsPresenter.new(target_statuses_from_notifications, current_user&.account_id)
     # 展示之前先调用外部接口鉴权
@@ -21,6 +22,7 @@ class Api::V1::NotificationsController < Api::BaseController
   end
 
   def show
+    logger.info "NotificationsController::show接口调用开始"
     @notification = current_account.notifications.without_suspended.find(params[:id])
     render json: @notification, serializer: REST::NotificationSerializer
     # 展示之前先调用外部接口鉴权
@@ -33,11 +35,13 @@ class Api::V1::NotificationsController < Api::BaseController
   end
 
   def clear
+    logger.info "NotificationsController::clear接口调用开始"
     current_account.notifications.delete_all
     render_empty
   end
 
   def dismiss
+    logger.info "NotificationsController::dismiss接口调用开始"
     current_account.notifications.find_by!(id: params[:id]).destroy!
     render_empty
   end
@@ -45,6 +49,7 @@ class Api::V1::NotificationsController < Api::BaseController
   private
 
   def load_notifications
+    logger.info "NotificationsController::load_notifications"
     notifications = browserable_account_notifications.includes(from_account: :account_stat).to_a_paginated_by_id(
       limit_param(DEFAULT_NOTIFICATIONS_LIMIT),
       params_slice(:max_id, :since_id, :min_id)
@@ -55,30 +60,35 @@ class Api::V1::NotificationsController < Api::BaseController
   end
 
   def browserable_account_notifications
+    logger.info "NotificationsController::browserable_account_notifications"
     current_account.notifications.without_suspended.browserable(exclude_types, from_account)
   end
 
   def target_statuses_from_notifications
+    logger.info "NotificationsController::target_statuses_from_notifications"
     @notifications.reject { |notification| notification.target_status.nil? }.map(&:target_status)
   end
 
   def insert_pagination_headers
+    logger.info "NotificationsController::insert_pagination_headers"
     set_pagination_headers(next_path, prev_path)
   end
 
   def next_path
+    logger.info "NotificationsController::next_path"
     # 展示之前先调用外部接口鉴权
     if require_check
-      logger.info "next_path require_check 鉴权成功 resp ===================== #{resp}"
+      logger.info "next_path require_check 鉴权成功"
       unless @notifications.empty?
         api_v1_notifications_url pagination_params(max_id: pagination_max_id)
       end
     else
-      logger.error "next_path require_check 鉴权失败 resp ===================== #{resp}"
+      logger.error "next_path require_check 鉴权失败"
     end
   end
 
   def prev_path
+    logger.info "NotificationsController::prev_path"
     unless @notifications.empty?
       api_v1_notifications_url pagination_params(min_id: pagination_since_id)
     end
